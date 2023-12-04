@@ -1,66 +1,58 @@
-const { comprobarJWT } = require('../helpers/jwt');
-const { usuarioConectado,
-        usuarioDesconectado,
-        grabarMensaje,
-        getUsuarios } = require('../controllers/sockets');
+const { comprobarJWT } = require('../helpers/jwt')
+const {
+  usuarioConectado,
+  usuarioDesconectado,
+  grabarMensaje,
+  getUsuarios
+} = require('../controllers/sockets')
 
 class Sockets {
+  constructor(io) {
+    this.io = io
+    this.socketEvents()
+  }
 
-    constructor( io ) {
+  socketEvents() {
+    // On connection
+    this.io.on('connection', async (socket) => {
+      const [valido, uid] = comprobarJWT(socket.handshake.query['x-token'])
 
-        this.io = io;
+      if (!valido) {
+        console.log('socket no identificado')
+        return socket.disconnect()
+      }
 
-        this.socketEvents();
-    }
+      await usuarioConectado(uid)
 
-    socketEvents() {
-        // On connection
-        this.io.on('connection', async( socket ) => {
+      // Unir al usuario a una sala de socket.io
+      socket.join(uid)
 
-            const [ valido, uid ] = comprobarJWT( socket.handshake.query['x-token']  );
+      // TODO: Validar el JWT 
+      // Si el token no es válido, desconectar
 
-            if ( !valido ) {
-                console.log('socket no identificado');
-                return socket.disconnect();
-            }
+      // TODO: Saber que usuario está activo mediante el UID
 
-            await usuarioConectado( uid );
+      // TODO: Emitir todos los usuarios conectados
+      this.io.emit('lista-usuarios', await getUsuarios())
 
-            // Unir al usuario a una sala de socket.io
-            socket.join( uid );
+      // TODO: Socket join, uid
 
-            // TODO: Validar el JWT 
-            // Si el token no es válido, desconectar
+      // TODO: Escuchar cuando el cliente manda un mensaje
+      socket.on('mensaje-personal', async (payload) => {
+        const mensaje = await grabarMensaje(payload)
+        this.io.to(payload.para).emit('mensaje-personal', mensaje)
+        this.io.to(payload.de).emit('mensaje-personal', mensaje)
+      })
 
-            // TODO: Saber que usuario está activo mediante el UID
-
-            // TODO: Emitir todos los usuarios conectados
-            this.io.emit( 'lista-usuarios', await getUsuarios() )
-
-            // TODO: Socket join, uid
-
-            // TODO: Escuchar cuando el cliente manda un mensaje
-            socket.on( 'mensaje-personal', async( payload ) => {
-                const mensaje = await grabarMensaje( payload );
-                this.io.to( payload.para ).emit( 'mensaje-personal', mensaje );
-                this.io.to( payload.de ).emit( 'mensaje-personal', mensaje );
-            });
-            
-
-            // TODO: Disconnect
-            // Marcar en la BD que el usuario se desconecto
-            // TODO: Emitir todos los usuarios conectados
-            socket.on('disconnect', async() => {
-                await usuarioDesconectado( uid );
-                this.io.emit( 'lista-usuarios', await getUsuarios() )
-            })
-            
-        
-        });
-    }
-
-
+      // TODO: Disconnect
+      // Marcar en la BD que el usuario se desconecto
+      // TODO: Emitir todos los usuarios conectados
+      socket.on('disconnect', async () => {
+        await usuarioDesconectado(uid)
+        this.io.emit('lista-usuarios', await getUsuarios())
+      })
+    })
+  }
 }
 
-
-module.exports = Sockets;
+module.exports = Sockets

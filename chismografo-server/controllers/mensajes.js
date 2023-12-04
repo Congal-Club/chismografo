@@ -1,29 +1,26 @@
-const Mensaje = require('../models/mensaje');
+const { response, request } = require('express')
 
-const obtenerChat = async( req, res ) => {
+const Mensaje = require('../models/mensaje')
 
-    const miId = req.uid;
-    const mensajesDe = req.params.de;
+const obtenerChat = async (req = request, res = response) => {
+  const miId = req.uid
+  const mensajesDe = req.params.de
 
-    const last30 = await Mensaje.find({
-        $or: [
-            { de: miId, para: mensajesDe },
-            { de: mensajesDe, para: miId },
-        ]
-    })
+  const last30 = await Mensaje.find({
+    $or: [
+      { de: miId, para: mensajesDe },
+      { de: mensajesDe, para: miId },
+    ]
+  })
     .sort({ createdAt: 'asc' })
-    .limit(30);
+    .limit(30)
 
-
-
-    res.json({
-        ok: true,
-        mensajes: last30
-    });
-
-
+  res.json({
+    ok: true,
+    mensajes: last30
+  })
 }
 
 module.exports = {
-    obtenerChat
+  obtenerChat
 }

@@ -29,4 +29,11 @@ router.post('/', [
 // Revalidar Token
 router.get('/renew', validarJWT, renewToken)
 
+router.get('/test', (req, res) => {
+  return res.json({
+    ok: true,
+    message: 'Holis'
+  })
+})
+
 module.exports = router

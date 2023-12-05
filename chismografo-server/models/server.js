@@ -52,7 +52,7 @@ class Server {
     this.configurarSockets()
 
     // Inicializar Server
-    this.server.listen(this.port, () => {
+    this.server.listen(this.port, '0.0.0.0', () => {
       console.log('Server corriendo en puerto:', this.port)
     })
   }

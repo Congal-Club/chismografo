@@ -1,4 +1,7 @@
 const { Schema, model } = require('mongoose')
+const { DataTypes } = require('sequelize')
+
+const { dbReplication } = require('../database/config')
 
 const UsuarioSchema = Schema({
   nombre: {
@@ -26,4 +29,34 @@ UsuarioSchema.method('toJSON', function () {
   return object
 })
 
-module.exports = model('Usuario', UsuarioSchema)
+const Usuario = model('Usuario', UsuarioSchema)
+
+const UsuarioReplication = dbReplication.define('usuarios', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  nombre: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  online: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
+}, {})
+
+module.exports = {
+  Usuario,
+  UsuarioReplication
+}

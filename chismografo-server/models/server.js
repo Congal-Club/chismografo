@@ -6,7 +6,7 @@ const path = require('path')
 const cors = require('cors')
 
 const Sockets = require('./sockets')
-const { dbConnection } = require('../database/config')
+const { dbConnection, dbReplication } = require('../database/config')
 
 class Server {
   constructor() {
@@ -15,12 +15,25 @@ class Server {
 
     // Conectar a DB
     dbConnection()
+    // Conectar a DB de replicación
+    this.dbConnectReplication()
 
     // Http server
     this.server = http.createServer(this.app)
 
     // Configuraciones de sockets
     this.io = socketio(this.server, { /* configuraciones */ })
+  }
+
+  async dbConnectReplication() {
+    try {
+      await dbReplication.authenticate()
+      dbReplication.sync()
+
+      console.log('Connection with replication db stablish')
+    } catch (error) {
+      console.log(`Error: ${error}`)
+    }
   }
 
   middlewares() {

@@ -1,13 +1,14 @@
 import '../css/login-register.css'
 
 import { useContext, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
 import { AuthContext } from '../auth/AuthContext'
 
 export const RegisterPage = () => {
   const { register } = useContext(AuthContext)
+  const navigate = useNavigate()
 
   const [form, setForm] = useState({
     email: '',
@@ -32,6 +33,8 @@ export const RegisterPage = () => {
 
     if (msg !== true) {
       Swal.fire('Error', msg, 'error')
+    } else {
+      navigate('/')
     }
   }
 

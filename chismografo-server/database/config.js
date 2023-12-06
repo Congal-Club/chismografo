@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { Sequelize } = require('sequelize')
 
 const dbConnection = async () => {
   try {
@@ -15,6 +16,22 @@ const dbConnection = async () => {
   }
 }
 
+const dbReplication = new Sequelize('chismografo', 'postgres', '1234', {
+  host: '192.168.39.17',
+  dialect: 'postgres',
+  port: 5432,
+  define: {
+    timestamps: true
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000,
+    acquire: 30000
+  }
+})
+
 module.exports = {
-  dbConnection
+  dbConnection,
+  dbReplication
 }

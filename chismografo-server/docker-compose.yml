@@ -1,0 +1,18 @@
+services:
+  chismografo:
+    image: postgres:15.3
+    container_name: chismografo_database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: chismografo
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
